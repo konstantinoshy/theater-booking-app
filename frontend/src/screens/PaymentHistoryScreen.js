@@ -16,17 +16,21 @@ export default function PaymentHistoryScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchPayments();
   }, []);
 
   const fetchPayments = async () => {
+    setLoading(true);
     try {
+      setError(null);
       const { data } = await api.get('/user/payments');
       setPayments(data);
-    } catch (error) {
-      console.log('Failed to load payments:', error.message);
+    } catch (err) {
+      console.log('Failed to load payments:', err.message);
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
     } finally {
       setLoading(false);
     }
@@ -96,6 +100,13 @@ export default function PaymentHistoryScreen({ navigation }) {
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator size="large" color={C.accent} style={{ marginTop: 40 }} />
+          ) : error ? (
+            <View style={s.errorContainer}>
+              <Text style={s.errorText}>{error}</Text>
+              <TouchableOpacity style={s.retryBtn} onPress={fetchPayments}>
+                <Text style={s.retryBtnText}>Δοκιμάστε ξανά</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <Text style={s.emptyText}>Δεν βρέθηκαν πληρωμές.</Text>
           )
@@ -218,5 +229,30 @@ const s = StyleSheet.create({
     marginTop: 40,
     fontSize: 14,
     fontFamily: 'Inter',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginTop: 48,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

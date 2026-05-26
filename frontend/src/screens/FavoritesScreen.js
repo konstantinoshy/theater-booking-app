@@ -20,13 +20,16 @@ export default function FavoritesScreen({ navigation }) {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchFavorites = async () => {
     try {
+      setError(null);
       const { data } = await api.get('/user/favorites');
       setFavorites(data);
-    } catch (error) {
-      console.log('Error fetching favorites:', error.message);
+    } catch (err) {
+      console.log('Error fetching favorites:', err.message);
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -138,6 +141,13 @@ export default function FavoritesScreen({ navigation }) {
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator size="large" color={C.accent} style={{ marginTop: 40 }} />
+          ) : error ? (
+            <View style={s.errorContainer}>
+              <Text style={s.errorText}>{error}</Text>
+              <TouchableOpacity style={s.retryBtn} onPress={fetchFavorites}>
+                <Text style={s.retryBtnText}>Δοκιμάστε ξανά</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <View style={s.emptyState}>
               <MaterialIcons name="heart-broken" size={64} color={C.surface} style={{ marginBottom: 16 }} />
@@ -244,5 +254,30 @@ const s = StyleSheet.create({
     fontFamily: 'Inter',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginTop: 48,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

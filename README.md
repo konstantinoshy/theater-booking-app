@@ -117,6 +117,99 @@ GET    /api/user/favorites           Αγαπημένες παραστάσεις
 POST   /api/user/favorites           Προσθήκη αγαπημένης
 DELETE /api/user/favorites/:showId   Αφαίρεση αγαπημένης
 ```
+## Δομή Έργου
+
+Ακολουθεί η δομή των αρχείων του έργου σε μορφή δέντρου (tree) με τη λειτουργία του καθενός:
+
+```text
+.
+├── .gitignore — Αρχείο ρύθμισης για την εξαίρεση αρχείων/φακέλων από το Git (π.χ. node_modules, .env).
+├── README.md — Το παρόν αρχείο τεκμηρίωσης του έργου.
+├── backend/ — Ο διακομιστής (API & Database) της εφαρμογής.
+│   ├── .env — Αρχείο ρυθμίσεων περιβάλλοντος (στοιχεία σύνδεσης βάσης, JWT secret κ.λπ. - δεν ανεβαίνει στο Git).
+│   ├── .env.example — Υπόδειγμα αρχείου .env με ενδεικτικές μεταβλητές.
+│   ├── package.json — Διαχείριση πακέτων, εξαρτήσεων (dependencies) και scripts εκτέλεσης του backend.
+│   ├── package-lock.json — Κλειδώνει τις ακριβείς εκδόσεις των εγκατεστημένων πακέτων του backend.
+│   ├── server.js — Το σημείο εισόδου (entry point) του Express backend, ρυθμίζει middlewares, routes και συνδέσεις.
+│   ├── start-db-and-server.ps1 — Script PowerShell για την αυτόματη εκκίνηση της MariaDB και του backend server.
+│   ├── config/ — Ρυθμίσεις παραμέτρων του συστήματος.
+│   │   └── db.js — Ρύθμιση διασύνδεσης με τη βάση δεδομένων MariaDB χρησιμοποιώντας το mysql2/promise.
+│   ├── controllers/ — Οι ελεγκτές (controllers) που περιέχουν τη λογική επεξεργασίας των αιτημάτων (HTTP requests).
+│   │   ├── authController.js — Διαχειρίζεται τις λειτουργίες εγγραφής (register), σύνδεσης (login) και ανανέωσης token.
+│   │   ├── reservationController.js — Διαχειρίζεται τη δημιουργία, τροποποίηση, ακύρωση και προβολή κρατήσεων.
+│   │   ├── seatController.js — Ελέγχει τη διαθεσιμότητα των θέσεων για συγκεκριμένες ώρες παραστάσεων.
+│   │   ├── showController.js — Διαχειρίζεται την ανάκτηση της λίστας παραστάσεων και των λεπτομερειών τους.
+│   │   ├── showtimeController.js — Διαχειρίζεται τις ημερομηνίες και ώρες διεξαγωγής των παραστάσεων (showtimes).
+│   │   ├── theatreController.js — Διαχειρίζεται την ανάκτηση των θεάτρων και των πληροφοριών τους.
+│   │   └── userController.js — Διαχειρίζεται το προφίλ, την αλλαγή κωδικού και το ιστορικό του χρήστη.
+│   ├── database/ — Αρχεία που αφορούν τη βάση δεδομένων.
+│   │   ├── create-app-user.sql — SQL Script για τη δημιουργία χρήστη βάσης δεδομένων με περιορισμένα δικαιώματα.
+│   │   ├── init-db.js — Script Node.js για την αρχικοποίηση των πινάκων της βάσης δεδομένων.
+│   │   ├── migration_add_auth0_sub.sql — SQL Script μετανάστευσης της βάσης (migration) για την υποστήριξη Auth0.
+│   │   └── schema.sql — SQL Script για τη δημιουργία πινάκων και την εισαγωγή δοκιμαστικών δεδομένων.
+│   ├── middleware/ — Ενδιάμεσο λογισμικό (middlewares).
+│   │   └── auth.js — Middleware επαλήθευσης της εγκυρότητας του JWT token (Authentication).
+│   ├── routes/ — Ορισμός των διαδρομών (API routing).
+│   │   ├── auth.js — Ορισμός REST endpoints για τις λειτουργίες αυθεντικοποίησης.
+│   │   ├── reservations.js — Ορισμός REST endpoints για τη διαχείριση κρατήσεων.
+│   │   ├── seats.js — Ορισμός REST endpoints για τον έλεγχο διαθέσιμων θέσεων.
+│   │   ├── shows.js — Ορισμός REST endpoints για τις παραστάσεις.
+│   │   ├── showtimes.js — Ορισμός REST endpoints για τα showtimes (ώρες/ημερομηνίες).
+│   │   ├── theatres.js — Ορισμός REST endpoints για τα θέατρα.
+│   │   └── user.js — Ορισμός REST endpoints για το προφίλ, τις ρυθμίσεις και το ιστορικό χρήστη.
+│   ├── scripts/ — Βοηθητικά σενάρια εκτέλεσης.
+│   │   └── db-ping.js — Script ελέγχου διασύνδεσης με τη βάση δεδομένων.
+│   └── services/ — Υπηρεσίες (services) με το business logic της εφαρμογής.
+│       ├── authService.js — Business logic για εγγραφή/σύνδεση και password hashing με bcrypt.
+│       ├── reservationService.js — Business logic για κρατήσεις (υπολογισμός διαθέσιμων θέσεων, δημιουργία/ακύρωση).
+│       ├── seatService.js — Business logic για τον έλεγχο διαθεσιμότητας θέσεων ανά ζώνη (VIP, Πάρτερ, Εξώστης).
+│       ├── showService.js — Business logic για την ανάκτηση και φιλτράρισμα παραστάσεων.
+│       ├── showtimeService.js — Business logic για την ανάκτηση των showtimes.
+│       ├── theatreService.js — Business logic για τα θέατρα και τις πληροφορίες τους.
+│       └── userService.js — Business logic για τη διαχείριση προφίλ, αλλαγής κωδικού και ιστορικού του χρήστη.
+└── frontend/ — Η εφαρμογή κινητού τηλεφώνου (React Native / Expo).
+    ├── App.js — Το κεντρικό αρχείο της εφαρμογής, ορίζει το Navigation (React Navigation) και τους Context Providers.
+    ├── app.json — Αρχείο ρυθμίσεων της εφαρμογής Expo (όνομα, έκδοση, εικονίδια, splash screens).
+    ├── babel.config.js — Ρυθμίσεις του Babel για τη μεταγλώττιση του κώδικα JavaScript/React Native.
+    ├── package.json — Διαχείριση πακέτων, εξαρτήσεων (dependencies) και scripts εκτέλεσης του frontend.
+    ├── package-lock.json — Κλειδώνει τις ακριβείς εκδόσεις των εγκατεστημένων πακέτων του frontend.
+    ├── assets/ — Στατικοί πόροι της εφαρμογής (λογότυπα, εικονίδια, splash screens, εικόνες κ.λπ.).
+    └── src/ — Ο πηγαίος κώδικας του frontend.
+        ├── components/ — Επαναχρησιμοποιήσιμα στοιχεία διεπαφής (UI components).
+        │   ├── CastMemberCard.js — UI component κάρτας για την προβολή ενός συντελεστή/ηθοποιού με την εικόνα του.
+        │   └── ImagePreviewModal.js — Component modal για προβολή εικόνων σε μεγέθυνση (π.χ. θεάτρων, παραστάσεων).
+        ├── config/ — Ρυθμίσεις συστήματος.
+        │   ├── api.js — Ρύθμιση του Base URL για το API και βοηθητικές συναρτήσεις επικοινωνίας με το backend.
+        │   └── auth0.js — Ρυθμίσεις για την ενσωμάτωση του Auth0 authentication (εάν επιλεγεί).
+        ├── context/ — Διαχείριση καθολικής κατάστασης (Global State Management).
+        │   ├── AuthContext.js — Context Provider για τη διαχείριση της κατάστασης σύνδεσης του χρήστη και αποθήκευσης του JWT token.
+        │   ├── FavoritesContext.js — Context Provider για τη διαχείριση των αγαπημένων παραστάσεων του χρήστη.
+        │   └── NotificationContext.js — Context Provider για τη διαχείριση και λήψη push notifications.
+        ├── Data/ — Στατικά/Τοπικά δεδομένα.
+        │   └── localContributors.js — Τοπικά δεδομένα συντελεστών για χρήση ως fallback.
+        ├── screens/ — Οι οθόνες της εφαρμογής (application screens).
+        │   ├── BookingScreen.js — Οθόνη επιλογής ζώνης θέσεων (Πάρτερ, Εξώστης, VIP) και επιβεβαίωσης της κράτησης.
+        │   ├── FavoritesScreen.js — Οθόνη εμφάνισης των αγαπημένων παραστάσεων που έχει αποθηκεύσει ο χρήστης.
+        │   ├── FullHistoryScreen.js — Οθόνη εμφάνισης του αναλυτικού ιστορικού κρατήσεων του χρήστη.
+        │   ├── HomeScreen.js — Η αρχική οθόνη της εφαρμογής με προτεινόμενα θέατρα και παραστάσεις.
+        │   ├── LoginScreen.js — Οθόνη εισαγωγής στοιχείων (email, κωδικός) για τη σύνδεση του χρήστη.
+        │   ├── PaymentHistoryScreen.js — Οθόνη εμφάνισης του ιστορικού πληρωμών για τις κρατήσεις του χρήστη.
+        │   ├── ProfileScreen.js — Οθόνη προφίλ του χρήστη με επιλογές πλοήγησης στο ιστορικό, τις ρυθμίσεις και αποσύνδεση.
+        │   ├── ProfileSettingsScreen.js — Οθόνη επεξεργασίας των στοιχείων προφίλ (email, όνομα) και αλλαγής κωδικού.
+        │   ├── RegisterScreen.js — Οθόνη εγγραφής νέου χρήστη.
+        │   ├── ShowDetailScreen.js — Οθόνη λεπτομερειών μιας παράστασης με πληροφορίες, συντελεστές και showtimes.
+        │   ├── ShowsScreen.js — Οθόνη εμφάνισης των παραστάσεων με δυνατότητα αναζήτησης και φιλτραρίσματος.
+        │   ├── TheatresScreen.js — Οθόνη εμφάνισης της λίστας όλων των θεάτρων με δυνατότητα αναζήτησης.
+        │   └── TicketScreen.js — Οθόνη εμφάνισης του ψηφιακού εισιτηρίου μιας ολοκληρωμένης κράτησης.
+        ├── theme/ — Στυλ και θέματα της εφαρμογής.
+        │   └── colors.js — Ορισμός της χρωματικής παλέτας της εφαρμογής για ομοιομορφία στο UI.
+        └── utils/ — Βοηθητικές συναρτήσεις (utility functions).
+            ├── descriptionForDisplay.js — Βοηθητική συνάρτηση για τη μορφοποίηση και προβολή των περιγραφών.
+            ├── localCastImageMap.js — Αντιστοίχιση των ονομάτων των ηθοποιών με τα τοπικά αρχεία εικόνων τους.
+            ├── localImageMap.js — Αντιστοίχιση των θεάτρων και των παραστάσεων με τα τοπικά αρχεία εικόνων τους.
+            └── notifications.js — Βοηθητικές συναρτήσεις για τη ρύθμιση και αποστολή push notifications.
+```
+
 
 ## License
 University project - All rights reserved.

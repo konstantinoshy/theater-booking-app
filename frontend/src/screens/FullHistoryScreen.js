@@ -165,6 +165,7 @@ export default function FullHistoryScreen({ route }) {
   const [reservations, setReservations] = useState(initialData);
   const [loading, setLoading] = useState(initialData.length === 0);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -174,6 +175,7 @@ export default function FullHistoryScreen({ route }) {
 
   const fetchReservations = async () => {
     try {
+      setError(null);
       const { data } = await api.get('/user/reservations');
       console.log('API returned', data?.length, 'items');
       if (data && Array.isArray(data)) {
@@ -181,7 +183,7 @@ export default function FullHistoryScreen({ route }) {
       }
     } catch (err) {
       console.log('Fetch error:', err);
-      Alert.alert('Σφάλμα', 'Αδυναμία φόρτωσης κρατήσεων.');
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -349,6 +351,13 @@ export default function FullHistoryScreen({ route }) {
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator size="large" color={C.accent} style={{ marginTop: 24 }} />
+          ) : error ? (
+            <View style={s.errorContainer}>
+              <Text style={s.errorText}>{error}</Text>
+              <TouchableOpacity style={s.retryBtn} onPress={fetchReservations}>
+                <Text style={s.retryBtnText}>Δοκιμάστε ξανά</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <Text style={s.emptyText}>Δεν υπάρχουν κρατήσεις ακόμα.</Text>
           )
@@ -435,4 +444,29 @@ const s = StyleSheet.create({
   cancelBtnText: { color: C.error, fontWeight: '700', fontSize: 13, letterSpacing: 0.1 },
   cancelledNote: { color: C.muted, opacity: 0.75, fontSize: 12, fontWeight: '500', fontStyle: 'italic', textAlign: 'center' },
   emptyText: { color: C.muted, textAlign: 'center', marginTop: 24, fontSize: 16 },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginTop: 48,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });

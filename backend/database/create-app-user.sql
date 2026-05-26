@@ -8,7 +8,7 @@ DROP USER IF EXISTS 'theatreapp'@'127.0.0.1';
 CREATE USER 'theatreapp'@'localhost' IDENTIFIED BY 'your_secure_password';
 CREATE USER 'theatreapp'@'127.0.0.1' IDENTIFIED BY 'your_secure_password';
 
-GRANT ALL PRIVILEGES ON theatre_booking.* TO 'theatreapp'@'localhost';
-GRANT ALL PRIVILEGES ON theatre_booking.* TO 'theatreapp'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON theatre_booking.* TO 'theatreapp'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON theatre_booking.* TO 'theatreapp'@'127.0.0.1';
 
 FLUSH PRIVILEGES;

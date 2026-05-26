@@ -108,6 +108,31 @@ const styles = StyleSheet.create({
     marginTop: 40,
     fontSize: 16,
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginTop: 48,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });
 
 export default function ShowsScreen({ route, navigation }) {
@@ -115,15 +140,18 @@ export default function ShowsScreen({ route, navigation }) {
   const { theatreId, theatreName } = route.params;
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => { fetchShows(); }, []);
 
   const fetchShows = async () => {
+    setLoading(true);
     try {
+      setError(null);
       const { data } = await api.get('/shows', { params: { theatreId } });
       setShows(data);
     } catch {
-      // silent
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
     } finally {
       setLoading(false);
     }
@@ -194,6 +222,13 @@ export default function ShowsScreen({ route, navigation }) {
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator size="large" color={C.accent} style={{ marginTop: 48 }} />
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={fetchShows}>
+                <Text style={styles.retryBtnText}>Δοκιμάστε ξανά</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <Text style={styles.emptyText}>Δεν βρέθηκαν παραστάσεις.</Text>
           )

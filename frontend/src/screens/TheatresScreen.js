@@ -12,6 +12,7 @@ export default function TheatresScreen({ navigation, route }) {
   const [theatres, setTheatres] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // ── Auto-navigate from Home featured cards ───────────────────────────────
   // HomeScreen navigates here first (TheatresList) to keep back-stack intact,
@@ -31,11 +32,12 @@ export default function TheatresScreen({ navigation, route }) {
   const fetchTheatres = useCallback(async () => {
     setLoading(true);
     try {
+      setError(null);
       const params = search ? { name: search } : {};
       const { data } = await api.get('/theatres', { params });
       setTheatres(data);
     } catch {
-      // silent
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
     } finally {
       setLoading(false);
     }
@@ -126,6 +128,13 @@ export default function TheatresScreen({ navigation, route }) {
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator size="large" color={C.accent} style={{ marginTop: 48 }} />
+          ) : error ? (
+            <View style={s.errorContainer}>
+              <Text style={s.errorText}>{error}</Text>
+              <TouchableOpacity style={s.retryBtn} onPress={fetchTheatres}>
+                <Text style={s.retryBtnText}>Δοκιμάστε ξανά</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <Text style={s.emptyText}>
               Δεν βρέθηκαν θεάτρα.
@@ -252,5 +261,30 @@ const s = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginTop: 48,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

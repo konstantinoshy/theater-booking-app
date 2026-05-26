@@ -282,27 +282,29 @@ export default function HomeScreen() {
 
   const [shows, setShows]               = useState([]);
   const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [notifModal, setNotifModal]     = useState(false);
 
   const carouselRef = useRef(null);
 
   // ── Fetch shows on focus ─────────────────────────────────────────────────────
+  const fetchShows = useCallback(async () => {
+    try {
+      setError(null);
+      const { data } = await api.get('/shows');
+      setShows(data);
+    } catch {
+      setError('Δεν ήταν δυνατή η φόρτωση. Ελέγξτε τη σύνδεσή σας.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      let active = true;
-      (async () => {
-        try {
-          const { data } = await api.get('/shows');
-          if (active) setShows(data);
-        } catch {
-          // silent — keep whatever was loaded
-        } finally {
-          if (active) setLoading(false);
-        }
-      })();
-      return () => { active = false; };
-    }, []),
+      fetchShows();
+    }, [fetchShows]),
   );
 
   // ── First 4 shows → carousel; rest → "Recently Added" list ──────────────────
@@ -391,6 +393,13 @@ export default function HomeScreen() {
             {loading ? (
               <View style={s.carouselPlaceholder}>
                 <ActivityIndicator size="large" color={C.accent} />
+              </View>
+            ) : error ? (
+              <View style={s.carouselPlaceholder}>
+                <Text style={s.errorText}>{error}</Text>
+                <TouchableOpacity style={s.retryBtn} onPress={fetchShows}>
+                  <Text style={s.retryBtnText}>Δοκιμάστε ξανά</Text>
+                </TouchableOpacity>
               </View>
             ) : featured.length > 0 ? (
               <View style={s.carouselSection}>
@@ -870,6 +879,24 @@ const s = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     paddingHorizontal: 20,
+  },
+  errorText: {
+    color: C.text,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: C.accent,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 16,
+  },
+  retryBtnText: {
+    color: C.bg,
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   // ── Notification modal ──────────────────────────────────────────────────────
